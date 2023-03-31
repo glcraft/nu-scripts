@@ -179,9 +179,9 @@ export def-env command [
 # Continue a chat with GPT-3.5
 export def-env chat [
     input?: string
-    --reset                              # Reset the chat history
-    --model: string = "gpt-3.5-turbo"    # The model to use, defaults to gpt-3.5-turbo
-    --max-tokens: int = 300              # The maximum number of tokens to generate, defaults to 150
+    --reset(-r)                              # Reset the chat history
+    --model(-m): string = "gpt-3.5-turbo"    # The model to use, defaults to gpt-3.5-turbo
+    --max-tokens: int = 300                  # The maximum number of tokens to generate, defaults to 150
 ] {
     let input = ($in | default $input)
     if $reset {
@@ -197,7 +197,7 @@ export def-env chat [
         {"role": "system", "content": "You are ChatGPT, a powerful conversational chatbot. Answer to me in informative way unless I tell you otherwise. You can format your message in markdown."},
         {"role": "user", "content": $input}
     ])
-    let result = (api chat-completion $model $messages --temperature 0 --top-p 1.0 --frequency-penalty 0.2 --presence-penalty 0 --max-tokens $max_tokens)
+    let result = (api chat-completion $model $messages --temperature 0.7 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens)
     # return $result
     set previous_messages ($messages | append [$result.choices.0.message])
     
@@ -207,7 +207,7 @@ export def-env chat [
 # Ask any question to the OpenAI model.
 export def ask [
     input?: string                          # The question to ask. If not provided, will use the input from the pipeline
-    --model: string = "gpt-3.5-turbo"       # The model to use, defaults to gpt-3.5-turbo
+    --model(-m): string = "gpt-3.5-turbo"       # The model to use, defaults to gpt-3.5-turbo
     --max-tokens: int                       # The maximum number of tokens to generate, defaults to 150
 ] {
     let input = ($in | default $input)
@@ -227,7 +227,7 @@ export def ask [
 }
 
 export def "git diff" [
-    --model: string = "gpt-3.5-turbo"       # The model to use, defaults to gpt-3.5-turbo
+    --model(-m): string = "gpt-3.5-turbo"       # The model to use, defaults to gpt-3.5-turbo
     --no_interactive            # If true, will not ask to commit and will pipe the result
     --max-tokens: int           # The maximum number of tokens to generate, defaults to 100
 ] {
