@@ -226,35 +226,28 @@ export def ask [
 }
 
 export def "git diff" [
-    --max-tokens: int           # The maximum number of tokens to generate, defaults to 100
+    --model: string = "gpt-3.5-turbo"       # The model to use, defaults to gpt-3.5-turbo
     --no_interactive            # If true, will not ask to commit and will pipe the result
+    --max-tokens: int           # The maximum number of tokens to generate, defaults to 100
 ] {
     let git_status = (^git status | str trim)
     if $git_status =~ "^fatal" {
         error make {msg: $git_status}
     }
     let result = (^git diff --cached --no-color --raw -p)
-    if $result == "" {
-        error make {msg: "No changes"}
+    if ($result | is-empty) {
+        print $"(ansi red)No change(ansi reset)"
     }
-    # let result = ($result | lines | each {|line| $"    ($line)"} | str join "\n")
-    let input = $"Get the git diff of the staged changes:
-```sh
-git diff --cached --no-color --raw -p
-```
 
-Result of the comand:
-```diff
-($result)
-```
-
-Commit with a message that explains the staged changes:
-```sh
-git commit -m \""
-    let max_tokens = ($max_tokens | default 2000)
-    let openai_result = (api completion "gpt-3.5-turbo" --prompt $input --temperature 0.1 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens --stop '"')
+    let max_tokens = ($max_tokens | default 20)
+    let messages = [
+        {role: "system"     content: "I send you the git diff of the staged changes using `git diff --cached --raw -p`. Based on the staged changes, write the message of the commit in 50 characters maximum."}
+        {role: "user"       content: $result}
+    ]
+    let openai_result = (api chat-completion $model $messages --temperature 0.1 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens )
     
-    let openai_result = ($openai_result.choices.0.text | str trim)
+    let openai_result = ($openai_result.choices.0.message.content | str trim | str trim -c '"')
+
     if not $no_interactive {
         print $"(ansi green)($openai_result)(ansi reset)"
         if (input "commit with this message ? (y/n) ") == "y" {
