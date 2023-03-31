@@ -245,7 +245,7 @@ export def "git diff" [
         {role: "system"     content: "I send you the git diff of the staged changes using `git diff --cached --raw -p`. Based on the staged changes, write the message of the commit in 50 characters maximum."}
         {role: "user"       content: $result}
     ]
-    let openai_result = (api chat-completion $model $messages --temperature 0.1 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens )
+    let openai_result = (api chat-completion $model $messages --temperature 0.3 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens )
     
     let openai_result = ($openai_result.choices.0.message.content | str trim | str trim -c '"')
 
