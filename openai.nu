@@ -20,7 +20,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 # SOFTWARE.
-
 use utils.nu
 
 def get-api [] {
@@ -153,7 +152,7 @@ export def-env command [
     let max_tokens = ($max_tokens | default 200)
     
     let messages = [
-        {"role": "system", "content": "You are a command line analyzer. Write the command that best fits my request in a \"Command\" markdown chapter then describe each parameter used in a \"Explanation\" markdown chapter."},
+        {"role": "system", "content": "In markdown, write the command that best fits my request in a \"```nu\" block in \"## Command\" then describe each parameter in \"## Explanation\"."},
         {"role": "user", "content": $input}
     ]
     let result = (api chat-completion "gpt-3.5-turbo" $messages --temperature 0 --top-p 1.0 --frequency-penalty 0.2 --presence-penalty 0 --max-tokens $max_tokens  )
@@ -161,12 +160,19 @@ export def-env command [
     set previous_messages ($messages | append [$result.choices.0.message])
     
     let result = $result.choices.0.message.content
-    utils md_to_console $result
+    # "# Debug"| utils display markdown 
+    # print $result
+    # "# Markdown"| utils display markdown 
+    $result | utils display markdown --no-bat
 
     if not $no_interactive {
+        let begin = ($result | str index-of "```nu") + 5
+        let end = ($result | str index-of "```" -r $"($begin),")
+        let command = ($result | str substring $begin..$end | str trim)
+        # print -n $"debug \(($begin), ($end)\): "; $command | nu-highlight
         print ""
         if (input "Execute ? (y/n) ") == "y" {
-            nu -c $"($result)"
+            nu -c $"($command)"
         }
     }
 }
