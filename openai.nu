@@ -176,6 +176,28 @@ export def-env command [
         }
     }
 }
+# Lists all messages in the chat history
+export def-env "chat list" [
+    --system(-s)        # Include system messages
+    --raw(-r)           # Return raw message data
+] {
+    let messages = if $system { 
+        get previous_messages
+    } else {
+        get previous_messages | where $it.role != "system"
+    }
+    if $raw {
+        return $messages
+    }
+    $messages | each {|it| 
+        print -n $"(ansi attr_bold)($it.role)(ansi reset): " 
+        if $it.role == "system" {
+            print $it.content
+        } else {
+            $it.content | utils display markdown
+        }
+    }
+}
 # Continue a chat with GPT-3.5
 export def-env chat [
     input?: string
