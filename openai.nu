@@ -142,7 +142,7 @@ export def "api completion" [
 # Ask for a command to run. Will return one line command.
 export def-env command [
     input?: string      # The command to run. If not provided, will use the input from the pipeline
-    --max-tokens: int   # The maximum number of tokens to generate, defaults to 64
+    --max-tokens: int   # The maximum number of tokens to generate, defaults to 200
     --no-interactive    # If true, will not ask to execute and will pipe the result 
 ] {
     let input = ($in | default $input)
