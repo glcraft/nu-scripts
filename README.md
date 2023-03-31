@@ -98,5 +98,82 @@ See [OpenAI docs](https://platform.openai.com/docs/api-reference/chat/create) fo
 
 ### Prompt Commands
 
+```nu
+openai command [input] [--max_tokens <max_tokens>] [--no-interactive]
+```
+Ask for a one line command(s) to run. 
 
+In interactive mode, `openai command` will ask you if you want to run the line. Otherwise, in non interactiuve mode,
+it will return the line in the pipeline.
 
+`openai command` uses chat-completion with "gpt-3.5-turbo" model.
+
+#### Parameters
+
+- **input (string)**: Your prompt. If `input` is not specified, `openai command` will take the prompt from the pipeline
+input 
+- **--max-tokens (int)**: The maximum number of tokens to generate in the completion, defaults to 200
+- **--no-interactive (flag)**: If true, will not ask to execute and will pipe the result.
+
+---
+```nu
+openai ask [input] [--model <model>] [--max_tokens <max_tokens>] [--no-interactive]
+```
+Ask any question to the OpenAI model. 
+
+It works like you ask a question or anything to ChatGPT. See `openai chat` to continue a conversation.
+
+#### Parameters
+
+- **input (string)**: Your prompt. If `input` is not specified, `openai chat` will take the prompt from the pipeline
+input 
+- **--model(-m)(string)**: ID of the model to use. Put a model compatible with chat-completion. Default to "gpt-3.5-turbo"
+- **--max-tokens (int)**: The maximum number of tokens to generate in the completion, defaults to 300
+- **--no-interactive (flag)**: Disable interactive mode
+
+---
+```nu
+openai chat [input] [--model <model>] [--max_tokens <max_tokens>] [--reset]
+```
+Continue a conversation based on the previous [Prompt commands](#prompt-commands). 
+
+It's similar to ChatGPT. You write a prompt 
+
+If `reset` is specified, it will remove the history of messages to start on a new basis.
+
+#### Parameters
+
+- **input (string)**: Your prompt. If `input` is not specified, `openai command` will take the prompt from the pipeline
+input 
+- **--model(-m)(string)**: ID of the model to use. Put a model compatible with chat-completion. Default to "gpt-3.5-turbo"
+- **--max-tokens (int)**: The maximum number of tokens to generate in the completion, defaults to 300
+- **--reset(-r) (int)**: Resets the history
+
+---
+```nu
+openai chat list [--system] [--raw]
+```
+Lists all messages in the chat history
+
+System messages are included only if `system` is specified.
+
+If `raw` is specified, the command returns the message list data.
+
+#### Parameters
+
+- **--system(-s) (flag)**: Include system messages
+- **--raw(-r) (flag)**: Return raw message data
+
+---
+```nu
+openai git diff  [--model <model>] [--max_tokens <max_tokens>] [--no-interactive]
+```
+Generate a commit message based on the staged change of the current directory
+
+The command suggests to send the commit for you if `no-interactive` is not specified.
+
+#### Parameters
+
+- **--model(-m)(string)**: ID of the model to use. Put a model compatible with chat-completion. Default to "gpt-3.5-turbo"
+- **--max-tokens (int)**: The maximum number of tokens to generate in the completion, defaults to 20
+- **--no-interactive (flag)**: Disable interactive mode
