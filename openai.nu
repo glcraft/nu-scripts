@@ -142,14 +142,13 @@ export def "api completion" [
 # Ask for a command to run. Will return one line command.
 export def-env command [
     input?: string      # The command to run. If not provided, will use the input from the pipeline
-    --max-tokens: int   # The maximum number of tokens to generate, defaults to 200
+    --max-tokens: int = 200   # The maximum number of tokens to generate, defaults to 200
     --no-interactive    # If true, will not ask to execute and will pipe the result 
 ] {
     let input = ($in | default $input)
     if $input == null {
         error make {msg: "input is required"}
     }
-    let max_tokens = ($max_tokens | default 200)
     
     let messages = [
         {"role": "system", "content": "In markdown, write the command that best fits my request in a \"```nu\" block in \"## Command\" then describe each parameter in \"## Explanation\"."},
@@ -180,12 +179,13 @@ export def-env command [
 export def-env chat [
     input?: string
     --reset                              # Reset the chat history
-    --model: string = "gpt-3.5-turbo"       # The model to use, defaults to gpt-3.5-turbo
-    --max-tokens: int                       # The maximum number of tokens to generate, defaults to 150
+    --model: string = "gpt-3.5-turbo"    # The model to use, defaults to gpt-3.5-turbo
+    --max-tokens: int = 300              # The maximum number of tokens to generate, defaults to 150
 ] {
     let input = ($in | default $input)
     if $reset {
         set previous_messages []
+        print "Chat history reset"
         return
     }
     if $input == null {
@@ -196,12 +196,12 @@ export def-env chat [
         {"role": "system", "content": "You are ChatGPT, a powerful conversational chatbot. Answer to me in informative way unless I tell you otherwise. You can format your message in markdown."},
         {"role": "user", "content": $input}
     ])
-    let result = (api chat-completion $model $messages --temperature 0 --top-p 1.0 --frequency-penalty 0.2 --presence-penalty 0 --max-tokens 300)
+    let result = (api chat-completion $model $messages --temperature 0 --top-p 1.0 --frequency-penalty 0.2 --presence-penalty 0 --max-tokens $max_tokens)
     # return $result
     set previous_messages ($messages | append [$result.choices.0.message])
     
     let result = $result.choices.0.message.content
-    utils md_to_console $result
+    $result | utils display markdown 
 }
 # Ask any question to the OpenAI model.
 export def ask [
