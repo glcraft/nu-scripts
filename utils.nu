@@ -32,7 +32,7 @@ export-env {
     let-env MARKDOWN_THEME = {
         code: "93"
         link: "36"
-        title: "107;90"
+        title: "1;47;30"
         prompt: "32"
         bold_italic: "1;3"
         bold: "1"
@@ -40,15 +40,48 @@ export-env {
     }
 }
 
-def md_title [title: string] {
-    let size = ((term size | get columns)) - 4
+def md_theme [] {
+    let theme = ($env | get -i MARKDOWN_THEME)
+    if $theme == null {
+        {
+            code: "93"
+            link: "36"
+            title: "1;47;30"
+            prompt: "32"
+            bold_italic: "1;3"
+            bold: "1"
+            italic: "3"
+        }
+    } else {
+        $theme
+    }
+}
+
+def md_line [] {
+    let size = ((term size | get columns)) - 2
+    let line = (char -u "2500")
+    let line_stop_right = (char -u "2574")
+    let line_stop_left = (char -u "2576")
+    print $"\n($line_stop_left)(1..$size | each {|| $line } | str join)($line_stop_right)\n"
+
+}
+
+def md_title [
+    title: string 
+    level: int = 1
+] {
+    let size = ((term size | get columns) / (1 bit-shl ($level - 1))) - 4
+    if $size < 0 {
+        print $"\n(ansi -e $"((md_theme).title)m") ($title) (ansi reset)\n"
+        return
+    }
     let title_length = ($title | str length)
     let left = (($size / 2) - $title_length / 2)
     let right = ($size - $left - $title_length)
     let line = (char -u "2500")
     let line_stop_left = (char -u "2574")
     let line_stop_right = (char -u "2576")
-    print $"\n(1..$left | each {|| $line } | str join)($line_stop_left)(ansi -e { fg: '#000000' bg: '#ffffff' attr: b }) ($title) (ansi reset)($line_stop_right)(1..$right | each {|| $line } | str join)\n"
+    print $"\n(1..$left | each {|| $line } | str join)($line_stop_left)(ansi -e $"((md_theme).title)m") ($title) (ansi reset)($line_stop_right)(1..$right | each {|| $line } | str join)\n"
 }
 
 export def "parse advanced" [
@@ -89,12 +122,12 @@ def md_add_modifier [
             for $i in 0..<($captured_data | length) {
                 let current = ($captured_data | get $i)
                 let captured = $"[($current.text)]\(($current.url)\)"
-                $text = ($text | str replace -s $captured $"(do $append_modifier $env.MARKDOWN_THEME.link)($current.url | ansi link --text $current.text)($apply_prev_mod)")
+                $text = ($text | str replace -s $captured $"(do $append_modifier (md_theme).link)($current.url | ansi link --text $current.text)($apply_prev_mod)")
             }
         }
     }
     if ($text =~ '`[^`]+`') {
-        $text = ($text | str replace "`([^`]+)`" $"(do $append_modifier $env.MARKDOWN_THEME.code)$1($apply_prev_mod)")
+        $text = ($text | str replace "`([^`]+)`" $"(do $append_modifier (md_theme).code)$1($apply_prev_mod)")
     }
     if ($text =~ '\*\*\*(?:(?!\*\*\*).)+\*\*\*') {
         let parsed = ($text | parse -r '\*\*\*(?<text>(?:(?!\*\*\*).)+)\*\*\*')
@@ -102,7 +135,7 @@ def md_add_modifier [
             for $i in 0..<($parsed | length) {
                 let current = ($parsed | get $i)
                 let captured = $"***($current.text)***"
-                $text = ($text | str replace -s $captured $"(do $append_modifier $env.MARKDOWN_THEME.bold_italic)($current.text | md_add_modifier ($previous_modifier | append [$env.MARKDOWN_THEME.bold_italic]))($apply_prev_mod)")
+                $text = ($text | str replace -s $captured $"(do $append_modifier (md_theme).bold_italic)($current.text | md_add_modifier ($previous_modifier | append [(md_theme).bold_italic]))($apply_prev_mod)")
             }
         }
     }
@@ -112,7 +145,7 @@ def md_add_modifier [
             for $i in 0..<($parsed | length) {
                 let current = ($parsed | get $i)
                 let captured = $"**($current.text)**"
-                $text = ($text | str replace -s $captured $"(do $append_modifier $env.MARKDOWN_THEME.bold)($current.text | md_add_modifier ($previous_modifier | append [$env.MARKDOWN_THEME.bold]))($apply_prev_mod)")
+                $text = ($text | str replace -s $captured $"(do $append_modifier (md_theme).bold)($current.text | md_add_modifier ($previous_modifier | append [(md_theme).bold]))($apply_prev_mod)")
             }
         }
     }
@@ -122,7 +155,7 @@ def md_add_modifier [
             for $i in 0..<($parsed | length) {
                 let current = ($parsed | get $i)
                 let captured = $"*($current.text)*"
-                $text = ($text | str replace -s $captured $"(do $append_modifier $env.MARKDOWN_THEME.italic)($current.text | md_add_modifier ($previous_modifier | append [$env.MARKDOWN_THEME.italic]))($apply_prev_mod)")
+                $text = ($text | str replace -s $captured $"(do $append_modifier (md_theme).italic)($current.text | md_add_modifier ($previous_modifier | append [(md_theme).italic]))($apply_prev_mod)")
             }
         }
     }
@@ -130,10 +163,10 @@ def md_add_modifier [
 }
 
 export def "display markdown" [
-    input: string
     --no-bat(-b)
     --force-nu
 ] {
+    let $input = $in
     mut markdown = $input
     mut code_lang = ""
     mut code = []
@@ -180,10 +213,14 @@ export def "display markdown" [
         }
 
         if ($line =~ '^\s*#+\s+') {
-            let name = ($line | parse -r '^\s*#+\s+(?<name>.*)$' | get 0.name)
-            md_title $name
+            let parsed = ($line | parse -r '^\s*(?<ht>#+)\s+(?<name>.*)$' | get 0)
+            md_title $parsed.name ($parsed.ht | str length)
             continue
         } 
+        if ($line =~ '^-{3,}$') {
+            md_line
+            continue
+        }
 
         mut newline = $line
         
