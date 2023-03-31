@@ -258,11 +258,3 @@ export def "git diff" [
         $openai_result
     }
 }
-
-
-export def test [
-    msg: string
-] {
-    
-    api chat-completion "gpt-3.5-turbo" [{role:"user" content:"Hello!"}] --temperature 0 --top-p 1.0 --frequency-penalty 0.2 --presence-penalty 0 --max-tokens 64 --stop "\\n"
-}
