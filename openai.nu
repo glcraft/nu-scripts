@@ -31,7 +31,7 @@ def get-api [] {
     return $env.OPENAI_API_KEY
 }
 # Lists the OpenAI models
-export def models [
+export def "api models" [
     --model: string    # The model to retrieve
 ] {
     let suffix = (if $model == null or $model == "" {
