@@ -170,6 +170,9 @@ export def-env command [
         let end = ($result | str index-of "```" -r $"($begin),")
         let command = ($result | str substring $begin..$end | str trim)
         # print -n $"debug \(($begin), ($end)\): "; $command | nu-highlight
+        if $command == "" {
+            return
+        }
         print ""
         if (input "Execute ? (y/n) ") == "y" {
             nu -c $"($command)"
