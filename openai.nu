@@ -245,7 +245,8 @@ export def ask [
         {"role": "user", "content": $input}
     ]
     let result = (api chat-completion $model $messages --temperature 0.7 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens )
-    $result.choices.0.message.content | str trim
+
+    $result.choices.0.message.content | str trim | utils display markdown
 }
 
 export def "git diff" [
