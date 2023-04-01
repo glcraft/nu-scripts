@@ -58,30 +58,16 @@ def md_theme [] {
 }
 
 def md_line [] {
-    let size = ((term size | get columns)) - 2
-    let line = (char -u "2500")
-    let line_stop_right = (char -u "2574")
-    let line_stop_left = (char -u "2576")
-    print $"\n($line_stop_left)(1..$size | each {|| $line } | str join)($line_stop_right)\n"
-
+    let size = ((term size | get columns))
+    print ("" | fill -c '─' -w $size)
 }
 
 def md_title [
     title: string 
     level: int = 1
 ] {
-    let size = ((term size | get columns) / (1 bit-shl ($level - 1))) - 4
-    if $size < 0 {
-        print $"\n(ansi -e $"((md_theme).title)m") ($title) (ansi reset)\n"
-        return
-    }
-    let title_length = ($title | str length)
-    let left = (($size / 2) - $title_length / 2)
-    let right = ($size - $left - $title_length)
-    let line = (char -u "2500")
-    let line_stop_left = (char -u "2574")
-    let line_stop_right = (char -u "2576")
-    print $"\n(1..$left | each {|| $line } | str join)($line_stop_left)(ansi -e $"((md_theme).title)m") ($title) (ansi reset)($line_stop_right)(1..$right | each {|| $line } | str join)\n"
+    let size = ((term size | get columns) / (1 bit-shl ($level - 1)))
+    print ($"(ansi -e $"((md_theme).title)m") ($title) (ansi reset)" | fill -a m -c '─' -w $size)
 }
 
 export def "parse advanced" [
