@@ -7,6 +7,8 @@ This is a collection of scripts I use to make my life easier in [nu](https://nus
 This script uses the [OpenAI API](https://platform.openai.com/) to generate text. 
 There are api commands and some prompt commands to make it easier to use.
 
+![Screenshot of openai command](docs/openai-command-screeshot.png)
+
 ### Usage
 
 Execute this line in nu :
