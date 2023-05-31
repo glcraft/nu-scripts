@@ -167,7 +167,7 @@ export def-env command [
 
     if not $no_interactive {
         let begin = ($result | str index-of "```nu") + 5
-        let end = ($result | str index-of "```" -r $"($begin),")
+        let end = ($result | str index-of "```" -r ($begin)..)
         let command = ($result | str substring $begin..$end | str trim)
         # print -n $"debug \(($begin), ($end)\): "; $command | nu-highlight
         if $command == "" {

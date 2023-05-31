@@ -208,16 +208,17 @@ export def "display markdown" [
             continue
         }
 
-        mut newline = $line
+        # mut newline = $line
         
-        if ($newline =~ '^\s*-\s+') {
+        let newline = if ($line =~ '^\s*-\s+') {
             let parsed = ($line | parse -r '^(\s*)(-\s+)' | get 0 )
             let index = (($parsed.capture0 | str length) + ($parsed.capture1 | str length))
             let spacing = ($parsed.capture0 | str length)
-            $newline = $"(repeat ' ' $spacing)(char prompt) ($newline | str substring $index..)"
+            $"(repeat ' ' $spacing)(char prompt) ($line | str substring $index..)"
+        } else {
+            $line
         }
-
-        $newline = ($newline | md_add_modifier)
+        let newline = ($newline | md_add_modifier)
         print $newline
         print -n (ansi reset)
     }
