@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
 # SOFTWARE.
 
-use utils.nu
+use markdown.nu
 
 def get-api [] {
     if not "OPENAI_API_KEY" in $env {
@@ -160,7 +160,7 @@ export def-env command [
     set previous_messages ($messages | append [$result.choices.0.message])
     
     let result = $result.choices.0.message.content
-    $result | utils markdown display --no-bat
+    $result | markdown display --no-bat
 
     if not $no_interactive {
         let begin = ($result | str index-of "```nu") + 5
@@ -194,7 +194,7 @@ export def-env "chat list" [
         if $it.role == "system" {
             print $it.content
         } else {
-            $it.content | utils markdown display
+            $it.content | markdown display
         }
     }
 }
@@ -224,7 +224,7 @@ export def-env chat [
     set previous_messages ($messages | append [$result.choices.0.message])
     
     let result = $result.choices.0.message.content
-    $result | utils markdown display 
+    $result | markdown display 
 }
 # Ask any question to the OpenAI model.
 export def ask [
@@ -246,7 +246,7 @@ export def ask [
     ]
     let result = (api chat-completion $model $messages --temperature 0.7 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens )
 
-    $result.choices.0.message.content | str trim | utils markdown display
+    $result.choices.0.message.content | str trim | markdown display
 }
 
 export def "git diff" [
