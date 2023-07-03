@@ -160,10 +160,7 @@ export def-env command [
     set previous_messages ($messages | append [$result.choices.0.message])
     
     let result = $result.choices.0.message.content
-    # "# Debug"| utils display markdown 
-    # print $result
-    # "# Markdown"| utils display markdown 
-    $result | utils display markdown --no-bat
+    $result | utils markdown display --no-bat
 
     if not $no_interactive {
         let begin = ($result | str index-of "```nu") + 5
@@ -197,7 +194,7 @@ export def-env "chat list" [
         if $it.role == "system" {
             print $it.content
         } else {
-            $it.content | utils display markdown
+            $it.content | utils markdown display
         }
     }
 }
@@ -227,7 +224,7 @@ export def-env chat [
     set previous_messages ($messages | append [$result.choices.0.message])
     
     let result = $result.choices.0.message.content
-    $result | utils display markdown 
+    $result | utils markdown display 
 }
 # Ask any question to the OpenAI model.
 export def ask [
@@ -249,7 +246,7 @@ export def ask [
     ]
     let result = (api chat-completion $model $messages --temperature 0.7 --top-p 1.0 --frequency-penalty 0 --presence-penalty 0 --max-tokens $max_tokens )
 
-    $result.choices.0.message.content | str trim | utils display markdown
+    $result.choices.0.message.content | str trim | utils markdown display
 }
 
 export def "git diff" [
