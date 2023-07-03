@@ -2,20 +2,42 @@
 
 This is a collection of scripts I use to make my life easier in [nu](https://nushell.sh).
 
-## OpenAI script
+## Utils module
 
-This script uses the [OpenAI API](https://platform.openai.com/) to generate text. 
-There are api commands and some prompt commands to make it easier to use.
+```
+<input text> | utils markdown display -> nothing
+```
+Parse the text as Markdown and prints the result in console style.
+
+
+```
+utils power-rename [--regex|-r] <old> <new> -> nothing
+```
+Rename a list of files using `parse`.
+
+**Parameters :**
+
+- **old (string)**: Old file name with parsing input
+- **new (closure)**: Closure to rename the file
+
+Example: 
+```
+$ ls 
+file1 file2 file3
+$ utils power-rename "file{id}" {|out| $"file_(out.id).txt"}
+$ ls
+file_1.txt file_2.txt file_3.txt
+```
+
+## OpenAI module
+
+This module uses the [OpenAI API](https://platform.openai.com/) to generate text.
+
+There are two kinds of commands:
+* [API Commands](#api-commands): raw API calls
+* [Prompt Commands](#prompt-commands): easy commands to interact with the API
 
 ![Screenshot of openai command](docs/openai-command-screeshot.png)
-
-### Usage
-
-Execute this line in nu :
-
-```nu
-use /path/to/scripts/openai.nu
-```
 
 ### API Commands
 ```nu
